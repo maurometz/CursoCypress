@@ -62,8 +62,10 @@ describe('É o esperas', () => {
     })
 
     it.only('Should vs Then', () => {
-        cy.get('#buttonListDOM').click()
-        cy.get('#lista li span')
-            .should('have.length', '1' )
+        cy.get('#buttonListDOM').then($el => {
+            // console.log($el);
+            expect($el).to.have.length(1)
+            // cy.get('#buttonList')
+        })
     })
 })
