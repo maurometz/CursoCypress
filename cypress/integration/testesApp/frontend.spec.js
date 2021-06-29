@@ -16,6 +16,21 @@ describe('Testes com o Barriga React', () => {
         // cy.resetApp()
     })
 
+    it('Testar a responsividade', () => {
+        cy.get('[data-test=menu-home]').should('exist')
+            .and('be.visible')
+        cy.viewport(500, 700)
+        cy.get('[data-test=menu-home]').should('exist')
+        .and('not.be.visible')
+        cy.viewport('iphone-5')
+        cy.get('[data-test=menu-home]').should('exist')
+        .and('not.be.visible')
+        cy.viewport('ipad-2')
+        cy.get('[data-test=menu-home]').should('exist')
+        .and('be.visible')
+        
+    })
+
     it('Adicionando conta', () => {
 
         cy.route({
@@ -199,7 +214,7 @@ describe('Testes com o Barriga React', () => {
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
     })
 
-    it.only('Deve validar dados adicionaos para criar conta', () => {
+    it('Deve validar dados adicionaos para criar conta', () => {
         const reqStub = cy.stub()
         cy.route({
             method: 'POST',
@@ -234,7 +249,7 @@ describe('Testes com o Barriga React', () => {
         cy.get(loc.MESSAGE).should('contain', 'sucesso!')
     })
 
-    it.only('Deve testar as cores', () => {
+    it('Deve testar as cores', () => {
         cy.route({
             method: 'GET',
             url: '/extrato/**',
@@ -249,6 +264,6 @@ describe('Testes com o Barriga React', () => {
             cy.xpath(loc.EXTRATO.FN_XP_LINHA('Receita pendente')).should('have.class', 'despesaPendente')
             cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa paga')).should('have.class', 'despesaPaga')
             cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa pendente')).should('have.class', 'receitaPendente')
-
     })
+
 })
