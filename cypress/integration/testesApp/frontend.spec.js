@@ -198,4 +198,57 @@ describe('Testes com o Barriga React', () => {
         cy.xpath(loc.EXTRATO.FN_XP_REMOVER_ELEMENTO('Movimentacao para exclusao')).click()
         cy.get(loc.MESSAGE).should('contain', 'sucesso')
     })
+
+    it.only('Deve validar dados adicionaos para criar conta', () => {
+        const reqStub = cy.stub()
+        cy.route({
+            method: 'POST',
+            url: '/contas',
+            response: {id: 3, nome: 'First Account', visivel: true, usuario_id: 1},
+            // onRequest: req => {
+            //     expect(req.request.body.nome).to.be.empty
+            //     expect(req.request.headers).to.have.property('Authorization')
+            // }
+            onRequest: reqStub
+        }).as('saveConta')
+
+        cy.acessarMenuConta()
+        cy.route({
+            method: 'GET',
+            url: '/contas',
+            response: [
+                {id:1, nome:'Carteira',visivel:true, usuario_id:1},
+                {id:2,nome:'Banco',visivel:true,usuario_id:1},
+                {id:3,nome:'First Account',visivel:true,usuario_id:1}
+
+            ]
+        }).as('contas')
+
+        cy.inserirConta('{CONTROL}')
+        // cy.wait('@saveConta').its('request.body.nome').should('not.be.empty')
+        cy.wait('@saveConta').then(() => {
+            console.log(reqStub.args[0][0])
+            expect(reqStub.args[0][0].request.body.name).to.be.empty
+            expect(reqStub.args[0][0].request.headers).to.have.property('Authorization')
+        })
+        cy.get(loc.MESSAGE).should('contain', 'sucesso!')
+    })
+
+    it.only('Deve testar as cores', () => {
+        cy.route({
+            method: 'GET',
+            url: '/extrato/**',
+            response:[
+                {"conta":"Conta para movimentacoes","id":616132,"descricao":"Receita paga","envolvido":"AAA","observacao":null,"tipo":"REC","data_transacao":"2021-06-29T03:00:00.000Z","data_pagamento":"2021-06-29T03:00:00.000Z","valor":"-1500.00","status":true,"conta_id":664977,"usuario_id":22325,"transferencia_id":null,"parcelamento_id":null},
+                {"conta":"Conta com movimentacao","id":616133,"descricao":"Receita pendente","envolvido":"BBB","observacao":null,"tipo":"DESP","data_transacao":"2021-06-29T03:00:00.000Z","data_pagamento":"2021-06-29T03:00:00.000Z","valor":"-1500.00","status":false,"conta_id":664978,"usuario_id":22325,"transferencia_id":null,"parcelamento_id":null},
+                {"conta":"Conta para saldo","id":616135,"descricao":"Despesa paga","envolvido":"DDD","observacao":null,"tipo":"DESP","data_transacao":"2021-06-29T03:00:00.000Z","data_pagamento":"2021-06-29T03:00:00.000Z","valor":"-1000.00","status":true,"conta_id":664979,"usuario_id":22325,"transferencia_id":null,"parcelamento_id":null},
+                {"conta":"Conta para saldo","id":616136,"descricao":"Despesa pendente","envolvido":"EEE","observacao":null,"tipo":"REC","data_transacao":"2021-06-29T03:00:00.000Z","data_pagamento":"2021-06-29T03:00:00.000Z","valor":"1534.00","status":false,"conta_id":664979,"usuario_id":22325,"transferencia_id":null,"parcelamento_id":null}   
+            ]})   
+            cy.get(loc.EXTRATO.MENU_EXTRATO).click()
+            cy.xpath(loc.EXTRATO.FN_XP_LINHA('Receita paga')).should('have.class', 'receitaPaga')
+            cy.xpath(loc.EXTRATO.FN_XP_LINHA('Receita pendente')).should('have.class', 'despesaPendente')
+            cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa paga')).should('have.class', 'despesaPaga')
+            cy.xpath(loc.EXTRATO.FN_XP_LINHA('Despesa pendente')).should('have.class', 'receitaPendente')
+
+    })
 })
